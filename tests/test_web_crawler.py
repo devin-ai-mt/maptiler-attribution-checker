@@ -18,23 +18,19 @@ def test_init():
 
 def test_robots_parser(crawler):
     """Test robots.txt parsing."""
-    with patch('urllib.robotparser.RobotFileParser') as mock_parser:
-        mock_instance = Mock()
-        mock_parser.return_value = mock_instance
+    # Create a mock parser instance
+    mock_parser = Mock()
+    mock_parser.can_fetch.return_value = True
 
-        # Set up all required mock methods
-        mock_instance.set_url.return_value = None
-        mock_instance.read.return_value = None
-        mock_instance.can_fetch.return_value = True
-
+    # Patch the _get_robots_parser method to return our mock
+    with patch.object(crawler, '_get_robots_parser', return_value=mock_parser):
         # Test the method
         result = crawler._can_fetch('https://example.com/page')
 
-        # Verify the complete chain of calls
+        # Verify the method calls
         assert result == True
-        mock_instance.set_url.assert_called_once_with('https://example.com/robots.txt')
-        mock_instance.read.assert_called_once()
-        mock_instance.can_fetch.assert_called_once_with('*', 'https://example.com/page')
+        crawler._get_robots_parser.assert_called_once_with('https://example.com')
+        mock_parser.can_fetch.assert_called_once_with('*', 'https://example.com/page')
 
 def test_extract_links(crawler):
     """Test link extraction from HTML."""
