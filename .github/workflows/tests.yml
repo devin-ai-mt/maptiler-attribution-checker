@@ -11,14 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
+
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pytest selenium webdriver_manager beautifulsoup4 requests
+
     - name: Run tests
       run: |
+        export CHROME_BINARY_PATH=/usr/bin/chromium-browser
+        export CHROMEDRIVER_PATH=/usr/bin/chromedriver
         python -m pytest tests/ -v
