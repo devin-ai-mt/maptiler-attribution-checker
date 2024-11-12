@@ -23,8 +23,16 @@ def test_robots_parser(crawler):
         mock_parser.return_value = mock_instance
         mock_instance.can_fetch.return_value = True
 
-        assert crawler._can_fetch('https://example.com/page') == True
-        mock_instance.can_fetch.assert_called_with('*', 'https://example.com/page')
+        # Mock the read() method which is called by _get_robots_parser
+        mock_instance.read.return_value = None
+
+        # Test the method
+        result = crawler._can_fetch('https://example.com/page')
+
+        # Verify the chain of calls
+        assert result == True
+        assert mock_instance.read.called
+        mock_instance.can_fetch.assert_called_once_with('*', 'https://example.com/page')
 
 def test_extract_links(crawler):
     """Test link extraction from HTML."""
