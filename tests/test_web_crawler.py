@@ -21,17 +21,19 @@ def test_robots_parser(crawler):
     with patch('urllib.robotparser.RobotFileParser') as mock_parser:
         mock_instance = Mock()
         mock_parser.return_value = mock_instance
-        mock_instance.can_fetch.return_value = True
 
-        # Mock the read() method which is called by _get_robots_parser
+        # Set up all required mock methods
+        mock_instance.set_url.return_value = None
         mock_instance.read.return_value = None
+        mock_instance.can_fetch.return_value = True
 
         # Test the method
         result = crawler._can_fetch('https://example.com/page')
 
-        # Verify the chain of calls
+        # Verify the complete chain of calls
         assert result == True
-        assert mock_instance.read.called
+        mock_instance.set_url.assert_called_once_with('https://example.com/robots.txt')
+        mock_instance.read.assert_called_once()
         mock_instance.can_fetch.assert_called_once_with('*', 'https://example.com/page')
 
 def test_extract_links(crawler):
